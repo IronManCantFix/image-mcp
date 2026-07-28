@@ -24,7 +24,7 @@
 无需安装，直接运行：
 
 ```bash
-uvx image-mcp
+uvx --from git+https://github.com/IronManCantFix/image-mcp.git image-mcp
 ```
 
 ### 方式二：使用 pip 安装
@@ -85,7 +85,7 @@ export IMAGE_MODEL="gpt-image-2"
 
 ```bash
 # 使用 uvx
-uvx image-mcp
+uvx --from git+https://github.com/IronManCantFix/image-mcp.git image-mcp
 
 # 使用 pip 安装后
 image-mcp
@@ -103,7 +103,7 @@ python server.py
   "mcpServers": {
     "image-mcp": {
       "command": "uvx",
-      "args": ["image-mcp"],
+      "args": ["--from", "git+https://github.com/IronManCantFix/image-mcp.git", "image-mcp"],
       "env": {
         "IMAGE_API_URL": "https://apihub.agnes-ai.com/v1/images/generations",
         "IMAGE_API_KEY": "your-agnes-api-key",
@@ -140,7 +140,7 @@ python server.py
   "mcpServers": {
     "image-mcp": {
       "command": "uvx",
-      "args": ["image-mcp"],
+      "args": ["--from", "git+https://github.com/IronManCantFix/image-mcp.git", "image-mcp"],
       "env": {
         "IMAGE_API_URL": "https://apihub.agnes-ai.com/v1/images/generations",
         "IMAGE_API_KEY": "your-agnes-api-key",
