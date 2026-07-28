@@ -47,7 +47,7 @@ pip install .
 ```bash
 export IMAGE_API_URL="https://api.openai.com/v1/images/generations"
 export IMAGE_API_KEY="sk-your-api-key"
-export IMAGE_MODEL="gpt-image-1"  # 可选，默认 gpt-image-1
+export IMAGE_MODEL="gpt-image-2"  # 可选，默认 gpt-image-1
 ```
 
 ### 方式二：配置文件

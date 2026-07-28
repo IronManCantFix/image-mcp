@@ -11,7 +11,7 @@ class ImageConfig:
     """图片生成配置"""
     api_url: str
     api_key: str
-    model: str = "gpt-image-1"
+    model: str = "gpt-image-2"  # 默认使用 gpt-image-2
 
 class ConfigError(Exception):
     """配置错误"""
@@ -39,7 +39,7 @@ def load_config(config_path: str = None) -> ImageConfig:
     # 环境变量覆盖
     api_url = os.environ.get("IMAGE_API_URL", config_data.get("api_url"))
     api_key = os.environ.get("IMAGE_API_KEY", config_data.get("api_key"))
-    model = os.environ.get("IMAGE_MODEL", config_data.get("model", "gpt-image-1"))
+    model = os.environ.get("IMAGE_MODEL", config_data.get("model", "gpt-image-2"))
     
     # 验证必填配置
     if not api_url:
