@@ -126,8 +126,8 @@ async def call_tool(name: str, arguments: dict):
         text=json.dumps(result, ensure_ascii=False)
     )]
 
-async def main():
-    """主函数"""
+async def _run():
+    """异步运行 MCP 服务器"""
     # 初始化客户端
     if not init_client():
         sys.exit(1)
@@ -140,5 +140,9 @@ async def main():
             server.create_initialization_options()
         )
 
+def main():
+    """主入口点（同步包装）"""
+    asyncio.run(_run())
+
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

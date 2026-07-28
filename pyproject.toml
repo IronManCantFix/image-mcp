@@ -1,0 +1,29 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "image-mcp"
+version = "0.1.0"
+description = "A MCP server for generating images using GPT-Image API"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.10"
+authors = [
+    { name = "IronManCantFix" }
+]
+dependencies = [
+    "mcp>=1.0.0",
+    "httpx>=0.25.0",
+    "Pillow>=10.0.0",
+]
+
+[project.scripts]
+image-mcp = "server:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+
+[project.urls]
+Homepage = "https://github.com/IronManCantFix/image-mcp"
+Repository = "https://github.com/IronManCantFix/image-mcp"

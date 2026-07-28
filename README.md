@@ -11,10 +11,24 @@
 
 ## 安装
 
+### 方式一：使用 uvx 直接运行（推荐）
+
 ```bash
-git clone <repo-url>
+uvx image-mcp
+```
+
+### 方式二：使用 pip 安装
+
+```bash
+pip install git+https://github.com/IronManCantFix/image-mcp.git
+```
+
+### 方式三：从源码安装
+
+```bash
+git clone https://github.com/IronManCantFix/image-mcp.git
 cd image-mcp
-pip install -r requirements.txt
+pip install .
 ```
 
 ## 配置
@@ -31,7 +45,7 @@ export IMAGE_MODEL="gpt-image-1"  # 可选，默认 gpt-image-1
 
 ```bash
 mkdir -p ~/.config/image-mcp
-cp config.example.json ~/.config/image-mcp/config.json
+curl -o ~/.config/image-mcp/config.json https://raw.githubusercontent.com/IronManCantFix/image-mcp/main/config.example.json
 # 编辑 config.json 填入你的配置
 ```
 
@@ -42,6 +56,13 @@ cp config.example.json ~/.config/image-mcp/config.json
 ### 作为 MCP 服务器启动
 
 ```bash
+# 如果使用 uvx
+uvx image-mcp
+
+# 如果使用 pip 安装
+image-mcp
+
+# 如果从源码
 python server.py
 ```
 
@@ -53,8 +74,24 @@ python server.py
 {
   "mcpServers": {
     "image-mcp": {
-      "command": "python",
-      "args": ["/path/to/image-mcp/server.py"],
+      "command": "uvx",
+      "args": ["image-mcp"],
+      "env": {
+        "IMAGE_API_URL": "https://api.openai.com/v1/images/generations",
+        "IMAGE_API_KEY": "sk-your-api-key"
+      }
+    }
+  }
+}
+```
+
+或使用 pip 安装后：
+
+```json
+{
+  "mcpServers": {
+    "image-mcp": {
+      "command": "image-mcp",
       "env": {
         "IMAGE_API_URL": "https://api.openai.com/v1/images/generations",
         "IMAGE_API_KEY": "sk-your-api-key"
