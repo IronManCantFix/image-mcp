@@ -85,7 +85,7 @@ class ImageClient:
         print(f"[INFO] Prompt: {prompt[:50]}...", file=sys.stderr)
         
         try:
-            async with httpx.AsyncClient(timeout=300.0) as client:
+            async with httpx.AsyncClient(timeout=300.0, proxy=self.config.proxy) as client:
                 print(f"[INFO] 发送请求到: {self.config.api_url}", file=sys.stderr)
                 
                 response = await client.post(

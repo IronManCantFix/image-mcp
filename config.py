@@ -3,6 +3,7 @@ import os
 import json
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Optional
 
 DEFAULT_CONFIG_PATH = "~/.config/image-mcp/config.json"
 
@@ -12,6 +13,7 @@ class ImageConfig:
     api_url: str
     api_key: str
     model: str = "gpt-image-2"  # 默认使用 gpt-image-2
+    proxy: Optional[str] = None  # HTTP 代理地址，如 http://127.0.0.1:7890
 
 class ConfigError(Exception):
     """配置错误"""
@@ -40,6 +42,7 @@ def load_config(config_path: str = None) -> ImageConfig:
     api_url = os.environ.get("IMAGE_API_URL", config_data.get("api_url"))
     api_key = os.environ.get("IMAGE_API_KEY", config_data.get("api_key"))
     model = os.environ.get("IMAGE_MODEL", config_data.get("model", "gpt-image-2"))
+    proxy = os.environ.get("IMAGE_PROXY", config_data.get("proxy"))
     
     # 验证必填配置
     if not api_url:
@@ -50,5 +53,6 @@ def load_config(config_path: str = None) -> ImageConfig:
     return ImageConfig(
         api_url=api_url,
         api_key=api_key,
-        model=model
+        model=model,
+        proxy=proxy
     )

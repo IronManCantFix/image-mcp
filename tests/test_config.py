@@ -69,3 +69,57 @@ def test_model_override(monkeypatch):
     config = load_config()
     
     assert config.model == "gpt-image-1"
+
+def test_proxy_from_env(monkeypatch):
+    """测试从环境变量加载代理配置"""
+    monkeypatch.setenv("IMAGE_API_URL", "https://test.api.com/v1")
+    monkeypatch.setenv("IMAGE_API_KEY", "test-key")
+    monkeypatch.setenv("IMAGE_PROXY", "http://127.0.0.1:7890")
+    
+    from config import load_config
+    config = load_config()
+    
+    assert config.proxy == "http://127.0.0.1:7890"
+
+def test_proxy_from_file(tmp_path):
+    """测试从配置文件加载代理"""
+    config_data = {
+        "api_url": "https://file.api.com/v1",
+        "api_key": "file-key",
+        "proxy": "http://127.0.0.1:8080"
+    }
+    config_file = tmp_path / "config.json"
+    config_file.write_text(json.dumps(config_data))
+    
+    from config import load_config
+    config = load_config(config_path=str(config_file))
+    
+    assert config.proxy == "http://127.0.0.1:8080"
+
+def test_proxy_default_none(monkeypatch):
+    """测试未配置代理时默认为 None"""
+    monkeypatch.setenv("IMAGE_API_URL", "https://test.api.com/v1")
+    monkeypatch.setenv("IMAGE_API_KEY", "test-key")
+    monkeypatch.delenv("IMAGE_PROXY", raising=False)
+    
+    from config import load_config
+    config = load_config()
+    
+    assert config.proxy is None
+
+def test_proxy_env_overrides_file(tmp_path, monkeypatch):
+    """测试环境变量代理覆盖配置文件"""
+    config_data = {
+        "api_url": "https://file.api.com/v1",
+        "api_key": "file-key",
+        "proxy": "http://127.0.0.1:8080"
+    }
+    config_file = tmp_path / "config.json"
+    config_file.write_text(json.dumps(config_data))
+    
+    monkeypatch.setenv("IMAGE_PROXY", "http://127.0.0.1:7890")
+    
+    from config import load_config
+    config = load_config(config_path=str(config_file))
+    
+    assert config.proxy == "http://127.0.0.1:7890"

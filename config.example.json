@@ -1,5 +1,6 @@
 {
   "api_url": "https://api.openai.com/v1/images/generations",
   "api_key": "sk-your-api-key-here",
-  "model": "gpt-image-2"
+  "model": "gpt-image-2",
+  "proxy": null
 }

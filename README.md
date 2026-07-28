@@ -75,6 +75,27 @@ export IMAGE_MODEL="gpt-image-2"
 
 > 💡 **提示**：配置文件路径可通过 `IMAGE_CONFIG_PATH` 环境变量覆盖。
 
+### 代理配置
+
+如需通过 HTTP 代理访问 API，可设置 `IMAGE_PROXY` 环境变量或在配置文件中添加 `proxy` 字段：
+
+```bash
+export IMAGE_PROXY="http://127.0.0.1:7890"
+```
+
+配置文件方式：
+
+```json
+{
+  "api_url": "https://api.openai.com/v1/images/generations",
+  "api_key": "sk-your-api-key",
+  "model": "gpt-image-2",
+  "proxy": "http://127.0.0.1:7890"
+}
+```
+
+未配置时默认不使用代理，同时也会尊重系统环境变量 `HTTP_PROXY` / `HTTPS_PROXY`。
+
 ### 配置优先级
 
 环境变量 > 配置文件 > 默认值
