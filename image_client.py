@@ -1,4 +1,4 @@
-"""GPT-Image API 客户端"""
+"""GPT-Image / Agnes AI 图片生成客户端"""
 import base64
 import httpx
 import sys
@@ -8,7 +8,7 @@ from typing import Optional
 from config import ImageConfig
 
 class ImageClient:
-    """GPT-Image API 客户端"""
+    """图片生成 API 客户端，兼容 GPT-Image 和 Agnes AI 接口"""
     
     def __init__(self, config: ImageConfig):
         self.config = config
@@ -85,8 +85,7 @@ class ImageClient:
         print(f"[INFO] Prompt: {prompt[:50]}...", file=sys.stderr)
         
         try:
-            # 图片生成可能需要很长时间，设置较长的超时
-            async with httpx.AsyncClient(timeout=300.0) as client:  # 5分钟超时
+            async with httpx.AsyncClient(timeout=300.0) as client:
                 print(f"[INFO] 发送请求到: {self.config.api_url}", file=sys.stderr)
                 
                 response = await client.post(
@@ -101,33 +100,45 @@ class ImageClient:
                 
                 data = response.json()
                 
-                if "data" in data and len(data["data"]) > 0:
-                    image_data = data["data"][0]
-                    
-                    if "b64_json" in image_data:
-                        img_bytes = base64.b64decode(image_data["b64_json"])
-                    elif "url" in image_data:
-                        print(f"[INFO] 下载图片: {image_data['url'][:100]}...", file=sys.stderr)
-                        img_response = await client.get(image_data["url"])
-                        img_bytes = img_response.content
-                    else:
-                        return {"success": False, "error": "API 响应中没有图片数据"}
-                    
-                    save_dir = Path(save_path).parent
-                    save_dir.mkdir(parents=True, exist_ok=True)
-                    
-                    with open(save_path, "wb") as f:
-                        f.write(img_bytes)
-                    
-                    print(f"[INFO] 图片已保存到: {save_path}", file=sys.stderr)
-                    
-                    return {
-                        "success": True,
-                        "file_path": str(Path(save_path).resolve()),
-                        "message": "图片已保存"
-                    }
-                else:
-                    return {"success": False, "error": f"API 响应格式异常: {response.text[:200]}"}
+                if "data" not in data or len(data["data"]) == 0:
+                    return {"success": False, "error": f"API 响应中没有图片数据: {response.text[:200]}"}
+                
+                image_data = data["data"][0]
+                
+                # 支持 b64_json 和 url 两种响应格式
+                img_bytes = None
+                
+                if image_data.get("b64_json"):
+                    print(f"[INFO] 解码 base64 图片数据", file=sys.stderr)
+                    img_bytes = base64.b64decode(image_data["b64_json"])
+                elif image_data.get("url"):
+                    image_url = image_data["url"]
+                    print(f"[INFO] 下载图片: {image_url[:100]}...", file=sys.stderr)
+                    img_response = await client.get(image_url)
+                    if img_response.status_code != 200:
+                        return {"success": False, "error": f"下载图片失败 (HTTP {img_response.status_code}): {img_response.text[:200]}"}
+                    img_bytes = img_response.content
+                    if not img_bytes:
+                        return {"success": False, "error": "下载的图片数据为空"}
+                
+                if img_bytes is None:
+                    return {"success": False, "error": "API 响应中没有图片数据（b64_json 和 url 均为空）"}
+                
+                # 确保保存目录存在
+                save_dir = Path(save_path).parent
+                save_dir.mkdir(parents=True, exist_ok=True)
+                
+                # 保存图片
+                with open(save_path, "wb") as f:
+                    f.write(img_bytes)
+                
+                print(f"[INFO] 图片已保存到: {save_path}", file=sys.stderr)
+                
+                return {
+                    "success": True,
+                    "file_path": str(Path(save_path).resolve()),
+                    "message": "图片已保存"
+                }
         
         except httpx.TimeoutException as e:
             print(f"[ERROR] 请求超时: {e}", file=sys.stderr)

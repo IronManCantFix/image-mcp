@@ -4,7 +4,9 @@
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![MCP Compatible](https://img.shields.io/badge/MCP-compatible-brightgreen.svg)](https://modelcontextprotocol.io)
 
-一个用于调用 GPT-Image API 生成图片的 MCP 服务器，支持文生图和图生图功能。
+一个用于调用 GPT-Image 兼容 API 生成图片的 MCP 服务器，支持文生图和图生图功能。
+
+兼容 [Agnes AI](https://apihub.agnes-ai.com) 和 [OpenAI GPT-Image](https://platform.openai.com/docs/api-reference/images) 等标准接口。
 
 ## ✨ 功能特性
 
@@ -13,6 +15,7 @@
 - ⚙️ **灵活配置**：支持环境变量和配置文件，环境变量优先
 - 🔌 **标准协议**：基于 MCP 协议，可集成到各种 AI 工具
 - 📁 **自动创建目录**：保存图片时自动创建不存在的目录
+- 🌐 **多后端兼容**：支持 Agnes AI、OpenAI 及其他兼容接口
 
 ## 📦 安装
 
@@ -42,30 +45,31 @@ pip install .
 
 ## ⚙️ 配置
 
-### 方式一：环境变量
+### Agnes AI（推荐）
+
+```bash
+export IMAGE_API_URL="https://apihub.agnes-ai.com/v1/images/generations"
+export IMAGE_API_KEY="your-agnes-api-key"
+export IMAGE_MODEL="agnes-image-2.0-flash"
+```
+
+### OpenAI
 
 ```bash
 export IMAGE_API_URL="https://api.openai.com/v1/images/generations"
-export IMAGE_API_KEY="sk-your-api-key"
-export IMAGE_MODEL="gpt-image-2"  # 可选，默认 gpt-image-1
+export IMAGE_API_KEY="sk-your-openai-api-key"
+export IMAGE_MODEL="gpt-image-2"
 ```
 
-### 方式二：配置文件
+### 配置文件
 
-1. 下载配置文件模板：
-
-```bash
-mkdir -p ~/.config/image-mcp
-curl -o ~/.config/image-mcp/config.json https://raw.githubusercontent.com/IronManCantFix/image-mcp/main/config.example.json
-```
-
-2. 编辑 `~/.config/image-mcp/config.json`，填入你的配置：
+也可以使用配置文件（默认路径 `~/.config/image-mcp/config.json`）：
 
 ```json
 {
   "api_url": "https://api.openai.com/v1/images/generations",
   "api_key": "sk-your-api-key",
-  "model": "gpt-image-1"
+  "model": "gpt-image-2"
 }
 ```
 
@@ -101,8 +105,9 @@ python server.py
       "command": "uvx",
       "args": ["image-mcp"],
       "env": {
-        "IMAGE_API_URL": "https://api.openai.com/v1/images/generations",
-        "IMAGE_API_KEY": "sk-your-api-key"
+        "IMAGE_API_URL": "https://apihub.agnes-ai.com/v1/images/generations",
+        "IMAGE_API_KEY": "your-agnes-api-key",
+        "IMAGE_MODEL": "agnes-image-2.0-flash"
       }
     }
   }
@@ -117,8 +122,9 @@ python server.py
     "image-mcp": {
       "command": "image-mcp",
       "env": {
-        "IMAGE_API_URL": "https://api.openai.com/v1/images/generations",
-        "IMAGE_API_KEY": "sk-your-api-key"
+        "IMAGE_API_URL": "https://apihub.agnes-ai.com/v1/images/generations",
+        "IMAGE_API_KEY": "your-agnes-api-key",
+        "IMAGE_MODEL": "agnes-image-2.0-flash"
       }
     }
   }
@@ -136,8 +142,9 @@ python server.py
       "command": "uvx",
       "args": ["image-mcp"],
       "env": {
-        "IMAGE_API_URL": "https://api.openai.com/v1/images/generations",
-        "IMAGE_API_KEY": "sk-your-api-key"
+        "IMAGE_API_URL": "https://apihub.agnes-ai.com/v1/images/generations",
+        "IMAGE_API_KEY": "your-agnes-api-key",
+        "IMAGE_MODEL": "agnes-image-2.0-flash"
       }
     }
   }
@@ -215,7 +222,11 @@ python server.py
 
 ## ❓ 常见问题
 
-### Q: 如何获取 API Key？
+### Q: 如何获取 Agnes AI API Key？
+
+A: 前往 [Agnes AI API Hub](https://apihub.agnes-ai.com) 注册并获取 API Key。
+
+### Q: 如何获取 OpenAI API Key？
 
 A: 前往 [OpenAI Platform](https://platform.openai.com/api-keys) 创建 API Key。
 
@@ -225,7 +236,7 @@ A: 输出格式为 PNG。图生图输入支持 PNG、JPG、JPEG、GIF、WebP 格
 
 ### Q: 可以使用其他兼容的 API 吗？
 
-A: 可以，只需将 `IMAGE_API_URL` 设置为对应的 API 端点地址即可。
+A: 可以，只需将 `IMAGE_API_URL` 设置为对应的 API 端点地址，`IMAGE_MODEL` 设置为对应的模型名称即可。接口需兼容 OpenAI GPT-Image 的请求/响应格式。
 
 ### Q: 图片保存在哪里？
 
@@ -238,5 +249,6 @@ MIT License - 详见 [LICENSE](LICENSE) 文件
 ## 🔗 相关链接
 
 - [MCP 协议官网](https://modelcontextprotocol.io)
+- [Agnes AI API Hub](https://apihub.agnes-ai.com)
 - [OpenAI GPT-Image API 文档](https://platform.openai.com/docs/api-reference/images)
 - [GitHub 仓库](https://github.com/IronManCantFix/image-mcp)
