@@ -1,6 +1,7 @@
 """GPT-Image API 客户端"""
 import base64
 import httpx
+import sys
 from pathlib import Path
 from typing import Optional
 
@@ -66,13 +67,9 @@ class ImageClient:
         payload = {
             "model": self.config.model,
             "prompt": prompt,
-            "n": 1
+            "n": 1,
+            "size": size
         }
-        
-        # 根据 API 类型决定是否添加 size 和 quality
-        # 某些 API（如 DALL-E）不支持 quality 参数
-        if size:
-            payload["size"] = size
         
         if image:
             payload["image"] = image
@@ -82,24 +79,23 @@ class ImageClient:
             "Content-Type": "application/json"
         }
         
-        # 打印调试信息
-        import sys
-        print(f"[DEBUG] API URL: {self.config.api_url}", file=sys.stderr)
-        print(f"[DEBUG] Model: {self.config.model}", file=sys.stderr)
-        print(f"[DEBUG] Payload keys: {list(payload.keys())}", file=sys.stderr)
+        print(f"[INFO] 正在调用 API 生成图片...", file=sys.stderr)
+        print(f"[INFO] 模型: {self.config.model}", file=sys.stderr)
+        print(f"[INFO] 尺寸: {size}", file=sys.stderr)
+        print(f"[INFO] Prompt: {prompt[:50]}...", file=sys.stderr)
         
         try:
-            async with httpx.AsyncClient(timeout=120.0) as client:
+            # 图片生成可能需要很长时间，设置较长的超时
+            async with httpx.AsyncClient(timeout=300.0) as client:  # 5分钟超时
+                print(f"[INFO] 发送请求到: {self.config.api_url}", file=sys.stderr)
+                
                 response = await client.post(
                     self.config.api_url,
                     json=payload,
                     headers=headers
                 )
                 
-                # 打印响应信息用于调试
-                print(f"[DEBUG] Response status: {response.status_code}", file=sys.stderr)
-                print(f"[DEBUG] Response headers: {dict(response.headers)}", file=sys.stderr)
-                print(f"[DEBUG] Response body (first 500 chars): {response.text[:500]}", file=sys.stderr)
+                print(f"[INFO] 收到响应，状态码: {response.status_code}", file=sys.stderr)
                 
                 response.raise_for_status()
                 
@@ -111,6 +107,7 @@ class ImageClient:
                     if "b64_json" in image_data:
                         img_bytes = base64.b64decode(image_data["b64_json"])
                     elif "url" in image_data:
+                        print(f"[INFO] 下载图片: {image_data['url'][:100]}...", file=sys.stderr)
                         img_response = await client.get(image_data["url"])
                         img_bytes = img_response.content
                     else:
@@ -122,6 +119,8 @@ class ImageClient:
                     with open(save_path, "wb") as f:
                         f.write(img_bytes)
                     
+                    print(f"[INFO] 图片已保存到: {save_path}", file=sys.stderr)
+                    
                     return {
                         "success": True,
                         "file_path": str(Path(save_path).resolve()),
@@ -130,13 +129,19 @@ class ImageClient:
                 else:
                     return {"success": False, "error": f"API 响应格式异常: {response.text[:200]}"}
         
+        except httpx.TimeoutException as e:
+            print(f"[ERROR] 请求超时: {e}", file=sys.stderr)
+            return {"success": False, "error": "请求超时（超过5分钟），图片生成需要较长时间，请稍后重试或使用更小的尺寸"}
         except httpx.HTTPStatusError as e:
+            print(f"[ERROR] HTTP错误: {e.response.status_code} - {e.response.text[:200]}", file=sys.stderr)
             return {
                 "success": False,
                 "error": f"API 请求失败 (HTTP {e.response.status_code})",
                 "details": e.response.text[:500]
             }
         except httpx.RequestError as e:
+            print(f"[ERROR] 请求错误: {e}", file=sys.stderr)
             return {"success": False, "error": f"网络请求失败: {e}"}
         except Exception as e:
+            print(f"[ERROR] 未知错误: {type(e).__name__}: {e}", file=sys.stderr)
             return {"success": False, "error": f"生成图片失败: {type(e).__name__}: {e}"}
